@@ -1,0 +1,10 @@
+{
+  "name": "integration-adwords",
+  "description": "mParticle integration sdk for Google Adwords",
+  "repository": "https://github.com/mParticle/integration-adwords",
+  "devDependencies": {
+    "blanket": "^1.1.7",
+    "mocha": "^2.3.2",
+    "should": "^7.1.0"
+  }
+}
