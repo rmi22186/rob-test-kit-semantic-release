@@ -76,7 +76,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
             if (window.google_trackConversion) {
                 window.google_trackConversion(adWordEvent);
             } else {
-                eventQueue.push(event);
+                eventQueue.push(adWordEvent);
             }
         }
 
@@ -262,12 +262,12 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
     function register(config) {
         if (!config) {
-            window.console.log('You must pass a config object to register the kit ' + name);
+            console.log('You must pass a config object to register the kit ' + name);
             return;
         }
 
         if (!isObject(config)) {
-            window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
+            console.log('\'config\' must be an object. You passed in a ' + typeof config);
             return;
         }
 
@@ -281,19 +281,21 @@ Object.defineProperty(exports, '__esModule', { value: true });
                 constructor: constructor
             };
         }
-        window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
+        console.log('Successfully registered ' + name + ' to your mParticle configuration');
     }
 
     function isObject(val) {
         return val != null && typeof val === 'object' && Array.isArray(val) === false;
     }
 
-    if (window && window.mParticle && window.mParticle.addForwarder) {
-        window.mParticle.addForwarder({
-            name: name,
-            constructor: constructor,
-            getId: getId
-        });
+    if (typeof window !== 'undefined') {
+        if (window && window.mParticle && window.mParticle.addForwarder) {
+            window.mParticle.addForwarder({
+                name: name,
+                constructor: constructor,
+                getId: getId
+            });
+        }
     }
 
     var GoogleAdWordsEventForwarder = {

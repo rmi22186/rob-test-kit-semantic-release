@@ -75,7 +75,7 @@ var mpAdWordsKit = (function (exports) {
                 if (window.google_trackConversion) {
                     window.google_trackConversion(adWordEvent);
                 } else {
-                    eventQueue.push(event);
+                    eventQueue.push(adWordEvent);
                 }
             }
 
@@ -261,12 +261,12 @@ var mpAdWordsKit = (function (exports) {
 
         function register(config) {
             if (!config) {
-                window.console.log('You must pass a config object to register the kit ' + name);
+                console.log('You must pass a config object to register the kit ' + name);
                 return;
             }
 
             if (!isObject(config)) {
-                window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
+                console.log('\'config\' must be an object. You passed in a ' + typeof config);
                 return;
             }
 
@@ -280,19 +280,21 @@ var mpAdWordsKit = (function (exports) {
                     constructor: constructor
                 };
             }
-            window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
+            console.log('Successfully registered ' + name + ' to your mParticle configuration');
         }
 
         function isObject(val) {
             return val != null && typeof val === 'object' && Array.isArray(val) === false;
         }
 
-        if (window && window.mParticle && window.mParticle.addForwarder) {
-            window.mParticle.addForwarder({
-                name: name,
-                constructor: constructor,
-                getId: getId
-            });
+        if (typeof window !== 'undefined') {
+            if (window && window.mParticle && window.mParticle.addForwarder) {
+                window.mParticle.addForwarder({
+                    name: name,
+                    constructor: constructor,
+                    getId: getId
+                });
+            }
         }
 
         var GoogleAdWordsEventForwarder = {
