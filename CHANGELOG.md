@@ -1,6 +1,9 @@
 ## Releases
 --
 
+#### 2.0.5 - 2020-11-11
+* There are no code changes in this commit. NPM published 2.0.4 but with the dist/ file from 2.0.3. This commit will include the correct dist/ file as we bump to 2.0.5
+
 #### 2.0.4 - 2020-11-10
 * Bugfix - Check window for node environments
 * Bugfix - rename event --> adWordEvent
