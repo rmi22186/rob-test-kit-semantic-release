@@ -61,12 +61,12 @@ jobs:
             - name: Run tests
               run: npm run test
 
-            - name: Merge internal/development to public/master for release
+            - name: Rebase internal/development to public/master for release
               run: |
                   git remote add public https://${{ secrets.GH_TOKEN_INTERNAL_TO_PUBLIC_TEST }}@github.com/mparticle/mparticle-web-sdk.git
                   git fetch public master
                   git checkout public/master
-                  git merge origin/development
+                  git rebase origin/development
 
             - name: Release --dry-run
               if: ${{ github.event.inputs.dryRun == 'true'}}
