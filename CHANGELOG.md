@@ -1,3 +1,15 @@
+# [1.1.0](https://github.com/rmi22186/rob-changelog-release-public/compare/v1.0.6...v1.1.0) (2021-02-24)
+
+
+### Bug Fixes
+
+* working example of semantic-release from release notes to publishing to npm ([060cfcd](https://github.com/rmi22186/rob-changelog-release-public/commit/060cfcdd828dd06ac14e09c1a31e4c41b3182bfd))
+
+
+### Features
+
+* Add key5 to constants ([3af07a9](https://github.com/rmi22186/rob-changelog-release-public/commit/3af07a952b0ae31b1b918cb0092109307b5d3068))
+
 ## Releases
 
 --
