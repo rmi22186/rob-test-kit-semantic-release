@@ -1,7 +1,7 @@
 {
-    "name": "@mparticle/web-sdk",
-    "version": "2.12.3",
-    "description": "mParticle core SDK for web applications",
+    "name": "@rmi22186/test-semantic-release",
+    "version": "1.0.5",
+    "description": "rob test semantic-release",
     "license": "Apache-2.0",
     "keywords": [
         "mparticle",
@@ -14,9 +14,12 @@
         "dist/mparticle.js",
         "src/"
     ],
+    "publishConfig": {
+        "access": "public"
+    },
     "main": "dist/mparticle.common.js",
     "module": "dist/mparticle.esm.js",
-    "repository": "https://github.com/mParticle/mparticle-web-sdk",
+    "repository": "https://github.com/rmi22186/rob-changelog-release-public",
     "scripts": {
         "build": "ENVIRONMENT=prod BUILDALL=true rollup --config rollup.config.js",
         "build:dev": "ENVIRONMENT=dev BUILD=iife rollup --config rollup.config.js",
@@ -52,7 +55,8 @@
         "lint": "eslint src/ test/src/",
         "gts:check": "gts check",
         "gts:fix": "gts fix",
-        "prettier": "node_modules/.bin/prettier --check \"**/*.js\""
+        "prettier": "node_modules/.bin/prettier --check \"**/*.js\"",
+        "prepublishOnly": "sh ./scripts/release.sh"
     },
     "pre-commit": [
         "lint"

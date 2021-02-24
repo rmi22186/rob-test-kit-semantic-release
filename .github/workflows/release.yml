@@ -46,7 +46,7 @@ jobs:
               uses: actions/checkout@v2
               with:
                   fetch-depth: 0
-                  repository: mparticle/mparticle-web-sdk-internal
+                  repository: rmi22186/rob-changelog-release-test-internal
                   token: ${{ secrets.GH_TOKEN_INTERNAL_TO_PUBLIC_TEST }}
                   ref: development
 
@@ -58,15 +58,15 @@ jobs:
             - name: Install dependencies
               run: npm ci
 
-            - name: Run tests
-              run: npm run test
-
             - name: Rebase internal/development to public/master for release
               run: |
-                  git remote add public https://${{ secrets.GH_TOKEN_INTERNAL_TO_PUBLIC_TEST }}@github.com/mparticle/mparticle-web-sdk.git
+                  git remote add public https://${{ secrets.GH_TOKEN_INTERNAL_TO_PUBLIC_TEST }}@github.com/rmi22186/rob-changelog-release-public.git
                   git fetch public master
                   git checkout public/master
                   git rebase origin/development
+
+            - name: Run tests
+              run: npm run test
 
             - name: Release --dry-run
               if: ${{ github.event.inputs.dryRun == 'true'}}
@@ -85,5 +85,6 @@ jobs:
 
             - name: Merge release commits to internal master and internal development
               run: |
+                  git push public HEAD:master
                   git push origin HEAD:master
                   git push origin HEAD:development
