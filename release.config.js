@@ -23,6 +23,12 @@ module.exports = {
         ],
         ['@semantic-release/npm'],
         [
+            ('@semantic-release/exec',
+            {
+                prepareCmd: 'sh ./scripts/release.sh',
+            }),
+        ],
+        [
             '@semantic-release/github',
             {
                 assets: [
