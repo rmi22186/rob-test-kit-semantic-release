@@ -1,7 +1,7 @@
 module.exports = {
     branches: ['master'],
     tagFormat: 'v${version}',
-    repositoryUrl: 'https://github.com/mParticle/mparticle-web-sdk',
+    repositoryUrl: 'https://github.com/rmi22186/rob-changelog-release-public',
     plugins: [
         [
             '@semantic-release/commit-analyzer',
@@ -23,10 +23,10 @@ module.exports = {
         ],
         ['@semantic-release/npm'],
         [
-            ('@semantic-release/exec',
+            '@semantic-release/exec',
             {
-                verifyReleaseCmd: 'sh ./scripts/release.sh',
-            }),
+                prepareCmd: 'sh ./scripts/release.sh',
+            },
         ],
         [
             '@semantic-release/github',

@@ -719,10 +719,13 @@ var mParticle = (function () {
       TriggerUploadType: TriggerUploadType
     };
 
+    var version = "1.2.1";
+
     var Constants = {
-      sdkVersion: '2.12.2',
+      sdkVersion: version,
       sdkVendor: 'mparticle',
       platform: 'web',
+      key8: 'test8',
       Messages: {
         ErrorMessages: {
           NoToken: 'A token must be specified.',
