@@ -1,3 +1,24 @@
+## [1.2.1](https://github.com/rmi22186/rob-changelog-release-public/compare/v1.2.0...v1.2.1) (2021-02-24)
+
+
+### Bug Fixes
+
+* UAdd test8 to constants ([ea920b1](https://github.com/rmi22186/rob-changelog-release-public/commit/ea920b155970ffeec3774587baeedcff8ff2b303))
+
+# [1.2.0](https://github.com/rmi22186/rob-changelog-release-public/compare/v1.1.1...v1.2.0) (2021-02-24)
+
+
+### Features
+
+* Add key7 to constants.js ([1373c5e](https://github.com/rmi22186/rob-changelog-release-public/commit/1373c5ea0659b510ec305d1cf75ba70db39a8000))
+
+## [1.1.1](https://github.com/rmi22186/rob-changelog-release-public/compare/v1.1.0...v1.1.1) (2021-02-24)
+
+
+### Bug Fixes
+
+* Add key6 to constants ([d2aa412](https://github.com/rmi22186/rob-changelog-release-public/commit/d2aa412ade8a80afd03bc64e8c7e48b0e0b791d0))
+
 # [1.1.0](https://github.com/rmi22186/rob-changelog-release-public/compare/v1.0.6...v1.1.0) (2021-02-24)
 
 
