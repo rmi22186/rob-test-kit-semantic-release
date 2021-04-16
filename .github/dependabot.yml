@@ -1,7 +1,12 @@
 version: 2
 updates:
-- package-ecosystem: npm
-  directory: "/"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
+    - package-ecosystem: npm
+      directory: '/'
+      schedule:
+          interval: daily
+      target-branch: 'development'
+      labels: 'dependabot'
+      open-pull-requests-limit: 1
+      ignore:
+          - dependency-name: 'rollup'
+            versions: ['1.x', '2.x']

@@ -5,46 +5,60 @@ name: Web SDK Build & Test
 on: [push, pull_request]
 
 jobs:
-    build-and-test:
-        name: Build and Test
+    # build-and-test:
+    #     name: Build and Test
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - name: Checkout
+    #           uses: actions/checkout@v2
+
+    #         - name: NPM install
+    #           uses: actions/setup-node@v1
+    #           with:
+    #               node-version: 12.x
+
+    #         - name: Run NPM CI
+    #           run: npm ci
+
+    #         - name: Lint with ESLint
+    #           run: npm run lint
+
+    #         - name: Lint with Prettier
+    #           run: npm run prettier
+
+    #         - name: Build Files
+    #           run: npm run build
+
+    #         - name: Run Core tests
+    #           run: npm run test
+
+    #         - name: Run Integration
+    #           run: npm run test:integrations
+
+    #         - name: Run Stub tests
+    #           run: npm run test:stub
+
+    check-name:
+        name: echo name of github actor
+        # needs: build-and-test
+        # if: ${{ contains(github.repository, 'internal' && github.actor == 'dependabot[bot]' && github.event_name == 'pull_request' }}
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout
-              uses: actions/checkout@v2
-
-            - name: NPM install
-              uses: actions/setup-node@v1
-              with:
-                  node-version: 12.x
-
-            - name: Run NPM CI
-              run: npm ci
-
-            - name: Lint with ESLint
-              run: npm run lint
-
-            - name: Lint with Prettier
-              run: npm run prettier
-
-            - name: Build Files
-              run: npm run build
-
-            - name: Run Core tests
-              run: npm run test
-
-            - name: Run Integration
-              run: npm run test:integrations
-
-            - name: Run Stub tests
-              run: npm run test:stub
+            - name: echo isSemantic
+              run: |
+                  echo ${{ github.actor }}
+            # - uses: fastify/github-action-merge-dependabot@v1
+            # with:
+            # github-token: ${{secrets.github_token}}
+            # merge-method: 'rebase'
 
     dependabot-automerge:
         name: Dependabot Auto Merge
-        needs: build-and-test
-        if: ${{ github.actor == 'dependabot[bot]' && github.event_name == 'pull_request' }}
+        # needs: build-and-test
+        if: ${{ contains(github.repository, 'internal') && github.actor == 'dependabot[bot]' && github.event_name == 'pull_request' }}
         runs-on: ubuntu-latest
         steps:
-            - uses: fastify/github-action-merge-dependabot@v1
+            - uses: fastify/github-action-merge-dependabot@v2
               with:
-                  github-token: ${{secrets.github_token}}
+                  github-token: ${{secrets.GITHUB_TOKEN}}
                   merge-method: 'rebase'
