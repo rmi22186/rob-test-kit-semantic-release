@@ -35,23 +35,56 @@
             labels,
             customAttributeMappings,
             reportingService,
-            eventQueue = [];
+            eventQueue = [],
+            gtagSiteId;
 
         self.name = name;
 
         function processEvent(event) {
             var reportEvent = false;
+            var sendEventFunction = function() {};
+            var generateEventFunction = function () {};
+            var conversionLabel;
+            var eventPayload;
 
             if (isInitialized) {
+                // First, process anything in the queue
+                processQueue(eventQueue);
+
                 try {
-                    if (event.EventDataType == MessageType.PageView) {
-                        reportEvent = logPageEvent(event, false);
+                    if (window.gtag && forwarderSettings.enableGtag == 'True') {
+                        sendEventFunction = sendGtagEvent;
+                        generateEventFunction = generateGtagEvent;
+                        generateCommerceEvent = generateGtagCommerceEvent;
+
+                    } else if (window.google_trackConversion) {
+                        // window.google_trackConversion is a legacy API and will be deprecated
+                        sendEventFunction = sendAdwordsEvent;
+                        generateEventFunction = generateAdwordsEvent;
+                        generateCommerceEvent = generateAdwordsCommerceEvent;
+
+                    } else {
+                        eventQueue.push({
+                            action: processEvent,
+                            data: event
+                        })
+
+                        return 'Can\'t send to forwarder ' + name + ', not initialized. Event added to queue.';
                     }
-                    else if (event.EventDataType == MessageType.PageEvent) {
-                        reportEvent = logPageEvent(event, true);
+
+                    // Get conversionLabel to be used for event generation
+                    var conversionLabel = getConversionLabel(event);
+                    var customProps = getCustomProps(event);
+
+                    // Determines the proper event to fire
+                    if (event.EventDataType == MessageType.PageView || event.EventDataType == MessageType.PageEvent) {
+                        eventPayload = generateEventFunction(event, conversionLabel, customProps);
+                    } else if (event.EventDataType == MessageType.Commerce && event.ProductAction) {
+                        eventPayload = generateCommerceEvent(event, conversionLabel, customProps);
                     }
-                    else if (event.EventDataType == MessageType.Commerce) {
-                        reportEvent = logCommerce(event);
+
+                    if (eventPayload) {
+                       reportEvent = sendEventFunction(eventPayload);
                     }
 
                     if (reportEvent && reportingService) {
@@ -63,74 +96,41 @@
                     return 'Can\'t send to forwarder: ' + name + '. Event not mapped';
                 }
                 catch (e) {
+                    console.error('Can\t send to forwarder', e);
                     return 'Can\'t send to forwarder: ' + name + ' ' + e;
                 }
-            }
-
-            return 'Can\'t send to forwarder ' + name + ', not initialized';
-        }
-
-        function sendOrQueueEvent(adWordEvent) {
-            if (window.google_trackConversion) {
-                window.google_trackConversion(adWordEvent);
             } else {
-                eventQueue.push(adWordEvent);
+                eventQueue.push({
+                    action: processEvent,
+                    data: event
+                })
             }
+
+            return 'Can\'t send to forwarder ' + name + ', not initialized. Event added to queue.';
         }
 
-        function logCommerce(event) {
-            if (event.ProductAction
-                && event.ProductAction.ProductList
-                && event.ProductAction.ProductActionType) {
+        // Converts an mParticle Commerce Event into either Legacy or gtag Event
+        function generateCommerceEvent(mPEvent, conversionLabel, isPageEvent) {
+            if (mPEvent.ProductAction
+                && mPEvent.ProductAction.ProductList
+                && mPEvent.ProductAction.ProductActionType) {
 
-                var isPageEvent = false;
-                var conversionLabel = getConversionLabel(event, isPageEvent);
-
-                if (typeof (conversionLabel) !== 'string') {
+                if (window.gtag && forwarderSettings.enableGtag == 'True') {
+                    return generateGtagCommerceEvent(mPEvent, conversionLabel, isPageEvent);
+                } else if (window.google_trackConversion) {
+                    return generateAdwordsCommerceEvent(mPEvent, conversionLabel, isPageEvent);
+                } else {
+                    console.error('Unrecognized Commerce Event', mPEvent);
                     return false;
                 }
-
-                var adWordEvent = getBaseAdWordEvent();
-                adWordEvent.google_conversion_label = conversionLabel;
-
-
-                if (event.ProductAction.ProductActionType === mParticle.ProductActionType.Purchase
-                    && event.ProductAction.TransactionId) {
-                    adWordEvent.google_conversion_order_id = event.ProductAction.TransactionId;
-                }
-
-                if (event.CurrencyCode) {
-                    adWordEvent.google_conversion_currency = event.CurrencyCode;
-                }
-
-                if (event.ProductAction.TotalAmount) {
-                    adWordEvent.google_conversion_value = event.ProductAction.TotalAmount;
-                }
-
-                adWordEvent.google_custom_params = getCustomProps(event, isPageEvent);
-
-                sendOrQueueEvent(adWordEvent);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        function logPageEvent(event, isPageEvent) {
-            var conversionLabel = getConversionLabel(event, isPageEvent);
-            if (typeof (conversionLabel) != 'string') {
+                    
+            } else {
                 return false;
             }
-
-            var adWordEvent = getBaseAdWordEvent();
-            adWordEvent.google_conversion_label = conversionLabel;
-            adWordEvent.google_custom_params = getCustomProps(event, isPageEvent);
-
-            sendOrQueueEvent(adWordEvent);
-
-            return true;
         }
+
+
+        // ** Adwords Events
 
         function getBaseAdWordEvent() {
             var adWordEvent = {};
@@ -143,9 +143,97 @@
             return adWordEvent;
         }
 
-        function getConversionLabel(event, isPageEvent) {
+        function generateAdwordsEvent(mPEvent, conversionLabel, customProps) {
+            var adWordEvent = getBaseAdWordEvent();
+            adWordEvent.google_conversion_label = conversionLabel;
+            adWordEvent.google_custom_params = customProps;
+
+            return adWordEvent;
+        }
+
+        function generateAdwordsCommerceEvent(mPEvent, conversionLabel, customProps) {
+            var adWordEvent = getBaseAdWordEvent();
+            adWordEvent.google_conversion_label = conversionLabel;
+
+            if (mPEvent.ProductAction.ProductActionType === mParticle.ProductActionType.Purchase
+                && mPEvent.ProductAction.TransactionId) {
+                adWordEvent.google_conversion_order_id = mPEvent.ProductAction.TransactionId;
+            }
+
+            if (mPEvent.CurrencyCode) {
+                adWordEvent.google_conversion_currency = mPEvent.CurrencyCode;
+            }
+
+            if (mPEvent.ProductAction.TotalAmount) {
+                adWordEvent.google_conversion_value = mPEvent.ProductAction.TotalAmount;
+            }
+
+            adWordEvent.google_custom_params = customProps;
+            return adWordEvent;
+        }
+
+        // gtag Events
+        function getBaseGtagEvent(conversionLabel) {
+            return {
+                'send-to': gtagSiteId + '/' + conversionLabel,
+                'value': 0,
+                'language': 'en',
+                'remarketing_only': forwarderSettings.remarketingOnly == 'True'
+            }
+        }
+
+        function generateGtagEvent(mPEvent, conversionLabel, customProps) {
+            if (!conversionLabel) { return null; };
+
+            var conversionPayload = getBaseGtagEvent(conversionLabel);
+            return mergeObjects(conversionPayload, customProps);
+        }
+
+        function generateGtagCommerceEvent(mPEvent, conversionLabel, customProps) {
+            if (!conversionLabel) { return null; };
+
+            var conversionPayload = getBaseGtagEvent(conversionLabel);
+
+            if (mPEvent.ProductAction.ProductActionType === mParticle.ProductActionType.Purchase
+                && mPEvent.ProductAction.TransactionId) {
+                conversionPayload.order_id = mPEvent.ProductAction.TransactionId;
+            }
+
+            if (mPEvent.CurrencyCode) {
+                conversionPayload.currency = mPEvent.CurrencyCode;
+            }
+
+            if (mPEvent.ProductAction.TotalAmount) {
+                conversionPayload.value = mPEvent.ProductAction.TotalAmount;
+            }
+
+            return mergeObjects(conversionPayload, customProps);
+        }
+
+        function sendGtagEvent(payload) {
+            try {
+                gtag('event', 'conversion', payload);
+            } catch (e) {
+                console.error('gtag is not available to send payload: ', payload, e);
+                return false;
+            }
+            return true;
+        }
+
+        function sendAdwordsEvent(payload) {
+            try {
+                window.google_trackConversion(payload);
+            } catch (e) {
+                console.error('google_trackConversion is not available to send payload: ', payload, e);
+                return false;
+            }
+            return true;
+        }
+
+        // Looks up an Event's conversionLabel from customAttributeMappings based on computed jsHash value
+        function getConversionLabel(event) {
             var jsHash = calculateJSHash(event.EventDataType, event.EventCategory, event.EventName);
-            var type = isPageEvent ? 'EventClass.Id' : 'EventClassDetails.Id';
+            var type = event.EventDataType === MessageType.PageEvent ? 'EventClass.Id' : 'EventClassDetails.Id';
             var conversionLabel = null;
             var mappingEntry = findValueInMapping(jsHash, type, labels);
 
@@ -156,10 +244,11 @@
             return conversionLabel;
         }
 
-        function getCustomProps(event, isPageEvent) {
+        // Filters Event.EventAttributes for attributes that are in customAttributeMappings
+        function getCustomProps(event) {
             var customProps = {};
             var attributes = event.EventAttributes;
-            var type = isPageEvent ? 'EventAttributeClass.Id' : 'EventAttributeClassDetails.Id';
+            var type = event.EventDataType === MessageType.PageEvent ? 'EventAttributeClass.Id' : 'EventAttributeClassDetails.Id';
 
             if (attributes) {
                 for (var attributeKey in attributes) {
@@ -200,27 +289,59 @@
             return mParticle.generateHash(preHash);
         }
 
+        function loadGtagSnippet() {
+            (function () {
+                window.dataLayer = window.dataLayer || [];
+                window.gtag = function(){dataLayer.push(arguments);}
+
+                var gTagScript = document.createElement('script');
+                gTagScript.async = true;
+                gTagScript.onload = function () {
+                    gtag('js', new Date());
+                    gtag('config', gtagSiteId);
+                    isInitialized = true;
+                    processQueue(eventQueue);
+                };
+                gTagScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + gtagSiteId;
+                document.getElementsByTagName('head')[0].appendChild(gTagScript);
+            })();
+        }
+
+        function loadLegacySnippet() {
+            (function () {
+                var googleAdwords = document.createElement('script');
+                googleAdwords.type = 'text/javascript';
+                googleAdwords.async = true;
+                googleAdwords.onload = function() {
+                    isInitialized = true;
+                    processQueue(eventQueue);
+                };
+                googleAdwords.src = ('https:' == document.location.protocol ? 'https' : 'http') + '://www.googleadservices.com/pagead/conversion_async.js';
+                document.getElementsByTagName('head')[0].appendChild(googleAdwords);
+            })();
+        }
+
         function initForwarder(settings, service, testMode) {
+
             forwarderSettings = settings;
             reportingService = service;
 
             try {
+                if (!forwarderSettings.conversionId) {
+                    return 'Can\'t initialize forwarder: ' + name + ', conversionId is not defined';
+                }
+
+                gtagSiteId = "AW-" + forwarderSettings.conversionId;
+
                 if (testMode !== true) {
-                    (function () {
-                        var googleAdwords = document.createElement('script');
-                        googleAdwords.type = 'text/javascript';
-                        googleAdwords.async = true;
-                        googleAdwords.onload = function() {
-                            if (eventQueue.length) {
-                                eventQueue.forEach(function(adWordEvent) {
-                                    window.google_trackConversion(adWordEvent);
-                                });
-                                eventQueue = [];
-                            }
-                        };
-                        googleAdwords.src = ('https:' == document.location.protocol ? 'https' : 'http') + '://www.googleadservices.com/pagead/conversion_async.js';
-                        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(googleAdwords, s);
-                    })();
+                    if (forwarderSettings.enableGtag == 'True') {
+                        loadGtagSnippet();
+                    } else {
+                        loadLegacySnippet();
+                    }
+                } else {
+                    isInitialized = true;
+                    processQueue(eventQueue);
                 }
 
                 if (!forwarderSettings.conversionId) {
@@ -241,8 +362,6 @@
                     return 'Can\'t initialize forwarder: ' + name + ', Could not process event to label mapping';
                 }
 
-                isInitialized = true;
-
                 return 'Successfully initialized: ' + name;
             }
             catch (e) {
@@ -250,8 +369,24 @@
             }
         }
 
+        function processQueue(queue) {
+            var item;
+            
+            if ((window.gtag || window.google_trackConversion) && queue.length > 0) {
+                try {
+                    while (queue.length > 0) {
+                        item = queue.shift()
+                        item.action(item.data);
+                    }
+                } catch (e) {
+                    console.error('Error on mParticle Adwords Kit', e);
+                }
+            }
+        }
+
         this.init = initForwarder;
         this.process = processEvent;
+        this.processQueue = processQueue;
     };
 
     function getId() {
@@ -284,6 +419,18 @@
 
     function isObject(val) {
         return val != null && typeof val === 'object' && Array.isArray(val) === false;
+    }
+
+    function mergeObjects() {
+        var resObj = {};
+        for(var i=0; i < arguments.length; i += 1) {
+             var obj = arguments[i],
+                 keys = Object.keys(obj);
+             for(var j=0; j < keys.length; j += 1) {
+                 resObj[keys[j]] = obj[keys[j]];
+             }
+        }
+        return resObj;
     }
 
     if (typeof window !== 'undefined') {
