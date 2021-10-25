@@ -1,6 +1,9 @@
 ## Releases
 --
 
+#### 2.1.0 - 2021-10-25
+* Implement Google Site Tag (GTAG) support as an opt-in feature
+
 #### 2.0.5 - 2020-11-11
 * There are no code changes in this commit. NPM published 2.0.4 but with the dist/ file from 2.0.3. This commit will include the correct dist/ file as we bump to 2.0.5
 
