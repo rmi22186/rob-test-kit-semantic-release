@@ -18,7 +18,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 //  limitations under the License.
 
     var name = 'GoogleAdWords',
-        moduleId = 1,
+        moduleId = 10,
         MessageType = {
             SessionStart: 1,
             SessionEnd: 2,
