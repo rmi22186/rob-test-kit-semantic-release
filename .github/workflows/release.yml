@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-18.04
     needs: confirm-public-repo-master-branch
     steps:
-      - name: Checkout internal development branch
+      - name: Checkout development branch
         uses: actions/checkout@v2
         with:
           ref: development
@@ -82,11 +82,11 @@ jobs:
           -p @semantic-release/git@9 \
           -p @semantic-release/exec@5 \
           semantic-release
-      - name: Push automated release commits to internal release branch
+      - name: Push automated release commits to release branch
         if: ${{ github.event.inputs.dryRun == 'false' }}
         run: |
           git status
-          git push internal HEAD:release/${{ github.run_number }}
+          git push origin HEAD:release/${{ github.run_number }}
   sync-repository:
     name: Sync development and master branches
     needs: release
@@ -109,7 +109,7 @@ jobs:
         run: |
           git push origin HEAD:master
           git push origin HEAD:development
-      - name: Delete internal release branch
+      - name: Delete release branch
         if: ${{ github.event.inputs.dryRun == 'false' }}
         run: |
           git push --delete origin release/${{ github.run_number }}
