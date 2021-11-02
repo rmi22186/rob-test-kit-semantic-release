@@ -16,7 +16,7 @@
 //  limitations under the License.
 
     var name = 'GoogleAdWords',
-        moduleId = 100,
+        moduleId = 1,
         MessageType = {
             SessionStart: 1,
             SessionEnd: 2,
