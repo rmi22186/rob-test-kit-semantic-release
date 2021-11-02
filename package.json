@@ -4,6 +4,9 @@
     "author": "rob",
     "description": "test",
     "repository": "https://github.com/rmi22186/rob-test-kit-semantic-release",
+    "publishConfig": {
+        "access": "public"
+    },
     "scripts": {
         "build": "rollup --config rollup.config.js",
         "watch": "rollup --config rollup.config.js -w",
