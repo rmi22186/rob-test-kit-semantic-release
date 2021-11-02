@@ -1,3 +1,16 @@
+# 1.0.0 (2021-11-02)
+
+
+### Bug Fixes
+
+* Update moduleid ([#14](https://github.com/rmi22186/rob-test-kit-semantic-release/issues/14)) ([1d9dd09](https://github.com/rmi22186/rob-test-kit-semantic-release/commit/1d9dd095f0caf914c561852b73a15cc8da28b77d))
+* Update package.json ([eb3169b](https://github.com/rmi22186/rob-test-kit-semantic-release/commit/eb3169b268d0ad8542ecd0376a2bc2575842d62c))
+
+
+### Features
+
+* Implement option to switch between conversion_async and gtag ([#20](https://github.com/rmi22186/rob-test-kit-semantic-release/issues/20)) ([198e232](https://github.com/rmi22186/rob-test-kit-semantic-release/commit/198e23281870a12e09aee4cf31776c582e602352))
+
 ## Releases
 --
 
