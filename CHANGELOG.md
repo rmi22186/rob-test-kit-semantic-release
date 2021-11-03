@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/rmi22186/rob-test-kit-semantic-release/compare/v1.1.1...v1.2.0) (2021-11-03)
+
+
+### Features
+
+* Update module id ([#17](https://github.com/rmi22186/rob-test-kit-semantic-release/issues/17)) ([4c72050](https://github.com/rmi22186/rob-test-kit-semantic-release/commit/4c720509b32fa212aee81c2daa37163913d7aeaf))
+
 ## [1.1.1](https://github.com/rmi22186/rob-test-kit-semantic-release/compare/v1.1.0...v1.1.1) (2021-11-02)
 
 
