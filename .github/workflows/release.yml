@@ -56,6 +56,11 @@ jobs:
       - name: Run tests
         run: npm run test
 
+      - name: Curl release.config.js and bundle-and-commit.sh
+        run: |
+          curl "https://raw.githubusercontent.com/rmi22186/workflows/master/web-kits/release.config.js" > release.config.js || exit 1
+          curl "https://raw.githubusercontent.com/rmi22186/workflows/master/web-kits/generate-bundle-and-commit.sh" > generate-bundle-and-commit.sh || exit 1
+
       - name: Release --dry-run
         if: ${{ github.event.inputs.dryRun == 'true'}}
         env:
